@@ -26,6 +26,12 @@ bot.on('message', function (user, userID, channelID, message, evt) {
        
         args = args.splice(1);
         switch(cmd) {
+            case 'intro':
+                bot.sendMessage({
+                    to: channelID,
+                    message: 'This bot is designed to make skill checks using the Shadowrun 5e rules and can make simple success tests, opposed tests, and extended tests. Type !help for info on how to use each one. Written by Daniel Scott, based on the Digital Trends Discord bot tutorial (https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/).'
+                });
+            break;
             // !help
             case 'help':
                 bot.sendMessage({
@@ -35,8 +41,6 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             break;
             // !successtest
             case 'successtest':
-                var regexFormat = /\d+\+\d+\[\d+\]\(\d+\)/g; //Proper format for the command (skill+attribute[limit](threshold)).
-                var isInFormat = regexFormat.test(message.substr(13)); //Checks for the correct format.
                 var regexValues = /\d+/g; //Looks for any numbers in the message string.
                 var values = message.match(regexValues); //Puts all the digits in regex into an array.
                 if (message.substr(13) == 'help') {
@@ -44,10 +48,10 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                         to: channelID,
                         message: 'Displays the results of a success test and determines whether it was successful or failed. Format: "skill"+"attribute"["limit"]("threshold")'
                     });
-                } else if (isInFormat == false) {
+                } else if (values.length != 4) {
                     bot.sendMessage({
                         to: channelID,
-                        message: 'Unknown command, for help type !successtest help'
+                        message: 'Please insert a value for the skill, attribute, limit, and threshold. (e.g. !successtest 2+2[4](3) or !successtest 2+2 4 3)'
                     });
                 } else {
                     var skill = parseInt(values[0]); //Gets skill from text.
@@ -59,6 +63,12 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     var max = 7;
                     var rolls = [];
                     var hits = 0;
+                    function wait(ms) {
+                        return new Promise(resolve => setTimeout(resolve, ms));
+                    }
+                    async function wait2() {
+                        await wait(2000);
+                    }
                     for (dice = 0; dice < dicePool; dice++) {
                         var random = Math.floor(Math.random() * (+max - +min) + +min);
                         rolls[dice] = random;
@@ -83,6 +93,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                         to: channelID,
                         message: '' + displayRolls
                     });
+                    wait2();
                     if (hits >= thresh) {
                         if (ones >= (dicePool / 2)) {
                             bot.sendMessage({
@@ -118,8 +129,6 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             break;
             // !opposedtest
             case 'opposedtest':
-                var regexFormat = /\d+\+\d+\[\d+\]/g; //Proper format for the command (skill+attribute[limit]).
-                var isInFormat = regexFormat.test(message.substr(13)); //Checks for the correct format.
                 var regexValues = /\d+/g; //Looks for any numbers in the message string.
                 var values = message.match(regexValues); //Puts all the digits in regex into an array.
                 // Checks to see if the help switch is used
@@ -129,10 +138,10 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                         message: 'Displays number of successes and glitches in an opposed test. Format: "skill"+"attribute"["limit"]'
                     });
                 // Checks to make sure text is in the right format.
-                } else if (isInFormat == false) {
+                } else if (values.length != 3) {
                     bot.sendMessage({
                         to: channelID,
-                        message: 'Unknown command, for help type !opposedtest help'
+                        message: 'Please insert a value for the skill, attribute, and limit (e.g. !opposedtest 2+2[3] or 2 2 3)'
                         });
                 } else {
                     var skill = parseInt(values[0]); // Gets skill from text.
@@ -146,6 +155,12 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     var rolls = []; // Array to store the result of rolls.
                     var hits = 0;
                     var ones = 0;
+                    function wait(ms) {
+                        return new Promise(resolve => setTimeout(resolve, ms));
+                    }
+                    async function wait2() {
+                        await wait(2000);
+                    }
                     for (dice = 0; dice < dicePool; dice++) {
                         // Generates a random number from 1-6
                         var random = Math.floor(Math.random() * (+max - +min) + +min);
@@ -180,6 +195,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                         to: channelID,
                         message: 'You scored ' + hits + ' hits.'
                     });
+                    wait2();
                     // Checks for glitches
                     if (ones >= (dicePool / 2)) {
                         // Checks for a critical glitch
@@ -199,8 +215,6 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             break;
             // !extendedtest
             case 'extendedtest':
-                var regexFormat = /\d+\+\d+\[\d+\]\(\d+\)/g;
-                var isInFormat = regexFormat.test(message.substr(14));
                 var regexValues = /\d+/g;
                 var values = message.match(regexValues);
                 if (message.substr(14) == 'help') {
@@ -208,10 +222,10 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                         to: channelID,
                         message: 'Determines the result of an extended test. The player may burn edge on any roll. The program assumes 1D6 will be subtracted on a glitch. Format: "skill"+"attribute"["limit"]("threshold")'
                     });
-                } else if (isInFormat == false) {
+                } else if (values.length != 4) {
                     bot.sendMessage({
                         to: channelID,
-                        message: 'Unknown command, for help type !extendedtest help'
+                        message: 'Please insert a value for the skill, attribute, limit, and threshold. (e.g. !extendedtest 2+2[4](5) or 2+2 4 5)'
                     });
                 } else {
                     var skill = parseInt(values[0]);
@@ -227,6 +241,12 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     var ones = 0;
                     var timeInterval = 0;
                     var dice = 0;
+                    function wait(ms) {
+                        return new Promise(resolve => setTimeout(resolve, ms));
+                    }
+                    async function wait2() {
+                        await wait(2000);
+                    }
                     do {
                         timeInterval += 1;
                         for (dice = 0; dice < dicePool; dice++) {
@@ -254,12 +274,14 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                             to: channelID,
                             message: '' + displayRolls
                         });
+                        wait2();
                         if (ones >= (dicePool / 2)) {
                             if (currentHits == 0) {
                                 bot.sendMessage ({
                                     to: channelID,
                                     message: 'You critically glitched!'
                                 });
+                                wait2();
                                 break;
                             } else {
                                 random = Math.floor(Math.random() * (+max - +min) + +min);
@@ -268,6 +290,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                                     to: channelID,
                                     message: 'You glitch and something goes wrong. Your task gets delayed!'
                                 });
+                                wait2();
                                 if (hits <= 0) {
                                     break;
                                 }
@@ -294,6 +317,11 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     }
                 }
             break;
+            default:
+                bot.sendMessage ({
+                    to: channelID,
+                    message: 'Unknown command. Valid commands for this bot include !intro, !help, !successtest, !opposedtest, and !extendedtest.'
+                })
          }
      }
 });
